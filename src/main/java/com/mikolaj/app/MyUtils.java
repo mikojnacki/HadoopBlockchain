@@ -57,6 +57,7 @@ public class MyUtils {
         String transactionHash;
         int transactionSize;
         boolean coinbase;
+        long transactionLockTime;
         long blk_id; //FK
 
         // TransactionInputs
@@ -71,11 +72,9 @@ public class MyUtils {
         List<Txout> txouts = new ArrayList<Txout>();
         long idTxout = txoutMultiplier * gid;
         int txoutIndex;
-        String pkScript; // empty string
-        long value;
-        //int typeInt;
-        String typeStr;
         String outAddress;
+        long value;
+        String typeStr;
         // FK tx_id the same as for TransactionInputs
 
         //Blk
@@ -92,8 +91,9 @@ public class MyUtils {
             transactionHash = transaction.getHashAsString();
             transactionSize = transaction.getMessageSize();
             coinbase = transaction.isCoinBase();
+            transactionLockTime = transaction.getLockTime();
             blk_id = idBlk;
-            Tx tx = new Tx(idTx, transactionHash, transactionSize, coinbase, blk_id);
+            Tx tx = new Tx(idTx, transactionHash, transactionSize, coinbase, transactionLockTime, blk_id);
             txs.add(tx);
 
             //Txin
@@ -117,7 +117,6 @@ public class MyUtils {
             for(TransactionOutput transactionOutput : transaction.getOutputs()) {
                 //set variables
                 try {
-                    pkScript = transactionOutput.getScriptPubKey().toString(); // not sure
                     value = transactionOutput.getValue().longValue();
                     Script.ScriptType type = transactionOutput.getScriptPubKey().getScriptType(); // enum
                     typeStr = type.toString();
@@ -141,7 +140,6 @@ public class MyUtils {
                             break;
                     }
                 } catch (ScriptException e) {
-                    pkScript = "unknown";
                     value = 0;
                     typeStr = "NO_TYPE";
                     outAddress = "unknown";
@@ -149,7 +147,7 @@ public class MyUtils {
                     e.printStackTrace();
                 }
 
-                Txout txout = new Txout(idTxout, txoutIndex, pkScript, value, typeStr, outAddress, tx_id);
+                Txout txout = new Txout(idTxout, txoutIndex, outAddress, value, typeStr, tx_id);
                 txouts.add(txout);
 
                 txoutIndex = txoutIndex + 1;
@@ -207,11 +205,12 @@ public class MyUtils {
             // Insert records
             for (Tx tx : txs) {
                 stmt = conn.createStatement();
-                String sql = "INSERT INTO tx (id, hash, tx_size, coinbase, blk_id) VALUES ("
+                String sql = "INSERT INTO tx (id, hash, coinbase, lock_time, tx_size, blk_id) VALUES ("
                         + tx.getId() + ", "
                         + "'" + tx.getTransactionHash() + "', "
-                        + tx.getTransactionSize() + ", "
                         + tx.isCoinbase() + ","
+                        + tx.getLockTime() + ","
+                        + tx.getTransactionSize() + ", "
                         + tx.getBlk_id() + ");";
                 stmt.executeUpdate(sql);
             }
@@ -271,13 +270,12 @@ public class MyUtils {
             // Insert records
             for (Txout txout : txouts) {
                 stmt = conn.createStatement();
-                String sql = "INSERT INTO txout (id, tx_idx, pk_script, value, type, address, tx_id) VALUES ("
+                String sql = "INSERT INTO txout (id, tx_idx, address, value, type, tx_id) VALUES ("
                         + txout.getId() + ", "
                         + txout.getTxoutIndex() + ","
-                        + "'" + txout.getPkScript() + "', "
+                        + "'" + txout.getOutAddress() + "', "
                         + txout.getValue() + ","
                         + "'" + txout.getTypeStr() + "', "
-                        + "'" + txout.getOutAddress() + "', "
                         + txout.getTx_id() + ");";
                 stmt.executeUpdate(sql);
             }
@@ -309,8 +307,11 @@ public class MyUtils {
         String blkRecords = "";
         FSDataOutputStream blkOutputStream = null;
         for (Blk blk : parsed.getBlks()) {
-            String blkRecord = String.valueOf(blk.getId()) + ";" + blk.getBlockHash() + ";" + blk.getPrevBlockHash()
-                    + String.valueOf(blk.getTime()) + ";" + String.valueOf(blk.getBlockSize()) + "\n";
+            String blkRecord = String.valueOf(blk.getId()) + ";"
+                    + blk.getBlockHash() + ";"
+                    + blk.getPrevBlockHash()
+                    + String.valueOf(blk.getTime()) + ";"
+                    + String.valueOf(blk.getBlockSize()) + "\n";
             blkRecords = blkRecords + blkRecord;
         }
         blkOutputStream = fs.append(blkHdfsPath);
@@ -323,8 +324,11 @@ public class MyUtils {
         String txRecords = "";
         FSDataOutputStream txOutputStream = null;
         for (Tx tx : parsed.getTxs()) {
-            String txRecord = String.valueOf(tx.getId()) + ";" + tx.getTransactionHash() + ";"
-                    + String.valueOf(tx.getTransactionSize()) + ";" + String.valueOf(tx.isCoinbase()) + ";"
+            String txRecord = String.valueOf(tx.getId()) + ";"
+                    + tx.getTransactionHash() + ";"
+                    + String.valueOf(tx.isCoinbase()) + ";"
+                    + String.valueOf(tx.getLockTime()) + ";"
+                    + String.valueOf(tx.getTransactionSize()) + ";"
                     + String.valueOf(tx.getBlk_id()) + "\n";
             txRecords = txRecords + txRecord;
         }
@@ -338,8 +342,10 @@ public class MyUtils {
         String txinRecords = "";
         FSDataOutputStream txinOutputStream = null;
         for (Txin txin : parsed.getTxins()) {
-            String txinRecord = String.valueOf(txin.getId()) + ";" + String.valueOf(txin.getTxinIndex()) + ";"
-                    + txin.getPrevTransactionHash() + ";" + String.valueOf(txin.getPrevTransactionIndex()) + ";"
+            String txinRecord = String.valueOf(txin.getId()) + ";"
+                    + String.valueOf(txin.getTxinIndex()) + ";"
+                    + txin.getPrevTransactionHash() + ";"
+                    + String.valueOf(txin.getPrevTransactionIndex()) + ";"
                     + String.valueOf(txin.getTx_id()) + "\n";
             txinRecords = txRecords + txinRecord;
         }
@@ -353,9 +359,12 @@ public class MyUtils {
         String txoutRecords = "";
         FSDataOutputStream txoutOutputStream = null;
         for (Txout txout : parsed.getTxouts()) {
-            String txoutRecord = String.valueOf(txout.getId()) + ";" + String.valueOf(txout.getTxoutIndex()) + ";"
-                    + txout.getPkScript() + ";" + String.valueOf(txout.getValue()) + ";" + txout.getTypeStr() + ";"
-                    + txout.getOutAddress() + ";" + String.valueOf(txout.getTx_id()) + "\n";
+            String txoutRecord = String.valueOf(txout.getId()) + ";"
+                    + String.valueOf(txout.getTxoutIndex()) + ";"
+                    + txout.getOutAddress() + ";"
+                    + String.valueOf(txout.getValue()) + ";"
+                    + txout.getTypeStr() + ";"
+                    + String.valueOf(txout.getTx_id()) + "\n";
             txoutRecords = txoutRecords + txoutRecord;
         }
         txoutOutputStream = fs.append(txoutHdfsPath);
@@ -382,8 +391,11 @@ public class MyUtils {
         String blkRecords = "";
         FSDataOutputStream blkOutputStream = null;
         for (Blk blk : parsed.getBlks()) {
-            String blkRecord = String.valueOf(blk.getId()) + ";" + blk.getBlockHash() + ";" + blk.getPrevBlockHash() + ";"
-                    + String.valueOf(blk.getTime()) + ";" + String.valueOf(blk.getBlockSize()) + "\n";
+            String blkRecord = String.valueOf(blk.getId()) + ";"
+                    + blk.getBlockHash() + ";"
+                    + blk.getPrevBlockHash()
+                    + String.valueOf(blk.getTime()) + ";"
+                    + String.valueOf(blk.getBlockSize()) + "\n";
             blkRecords = blkRecords + blkRecord;
         }
         blkOutputStream = fs.append(blkHdfsPath);
@@ -396,8 +408,11 @@ public class MyUtils {
         String txRecords = "";
         FSDataOutputStream txOutputStream = null;
         for (Tx tx : parsed.getTxs()) {
-            String txRecord = String.valueOf(tx.getId()) + ";" + tx.getTransactionHash() + ";"
-                    + String.valueOf(tx.getTransactionSize()) + ";" + String.valueOf(tx.isCoinbase()) + ";"
+            String txRecord = String.valueOf(tx.getId()) + ";"
+                    + tx.getTransactionHash() + ";"
+                    + String.valueOf(tx.isCoinbase()) + ";"
+                    + String.valueOf(tx.getLockTime()) + ";"
+                    + String.valueOf(tx.getTransactionSize()) + ";"
                     + String.valueOf(tx.getBlk_id()) + "\n";
             txRecords = txRecords + txRecord;
         }
@@ -411,8 +426,10 @@ public class MyUtils {
         String txinRecords = "";
         FSDataOutputStream txinOutputStream = null;
         for (Txin txin : parsed.getTxins()) {
-            String txinRecord = String.valueOf(txin.getId()) + ";" + String.valueOf(txin.getTxinIndex()) + ";"
-                    + txin.getPrevTransactionHash() + ";" + String.valueOf(txin.getPrevTransactionIndex()) + ";"
+            String txinRecord = String.valueOf(txin.getId()) + ";"
+                    + String.valueOf(txin.getTxinIndex()) + ";"
+                    + txin.getPrevTransactionHash() + ";"
+                    + String.valueOf(txin.getPrevTransactionIndex()) + ";"
                     + String.valueOf(txin.getTx_id()) + "\n";
             txinRecords = txRecords + txinRecord;
         }
@@ -426,9 +443,12 @@ public class MyUtils {
         String txoutRecords = "";
         FSDataOutputStream txoutOutputStream = null;
         for (Txout txout : parsed.getTxouts()) {
-            String txoutRecord = String.valueOf(txout.getId()) + ";" + String.valueOf(txout.getTxoutIndex()) + ";"
-                    + txout.getPkScript() + ";" + String.valueOf(txout.getValue()) + ";" + txout.getTypeStr() + ";"
-                    + txout.getOutAddress() + ";" + String.valueOf(txout.getTx_id()) + "\n";
+            String txoutRecord = String.valueOf(txout.getId()) + ";"
+                    + String.valueOf(txout.getTxoutIndex()) + ";"
+                    + txout.getOutAddress() + ";"
+                    + String.valueOf(txout.getValue()) + ";"
+                    + txout.getTypeStr() + ";"
+                    + String.valueOf(txout.getTx_id()) + "\n";
             txoutRecords = txoutRecords + txoutRecord;
         }
         txoutOutputStream = fs.append(txoutHdfsPath);

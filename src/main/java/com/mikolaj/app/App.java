@@ -35,7 +35,7 @@ public class App {
         //ToolRunner.run(new TopTxDriver(), args);
 
         // Parse blockchain into PostgreSQL database
-        //ToolRunner.run(new ParsePostgresRawDriver(), args);
+        ToolRunner.run(new ParsePostgresRawDriver(), args);
         programName = "ParsePostgresRawMapReduce";
 
         // Parse blockchain into HDFS text files

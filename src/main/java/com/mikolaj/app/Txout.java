@@ -6,21 +6,17 @@ package com.mikolaj.app;
 public class Txout {
     private long id;
     private int txoutIndex;
-    private String pkScript;
-    private long value;
-    //private int type;
-    private String typeStr;
     private String outAddress;
+    private long value;
+    private String typeStr;
     private long tx_id; //FK
 
-    public Txout(long id, int txoutIndex, String pkScript, long value, String typeStr, String outAddress, long tx_id) {
+    public Txout(long id, int txoutIndex, String outAddress, long value, String typeStr,  long tx_id) {
         this.id = id;
         this.txoutIndex = txoutIndex;
-        this.pkScript = pkScript;
-        this.value = value;
-        //this.type = type;
-        this.typeStr = typeStr;
         this.outAddress = outAddress;
+        this.value = value;
+        this.typeStr = typeStr;
         this.tx_id = tx_id;
     }
 
@@ -32,14 +28,6 @@ public class Txout {
         this.txoutIndex = txoutIndes;
     }
 
-    public String getPkScript() {
-        return pkScript;
-    }
-
-    public void setPkScript(String pkScript) {
-        this.pkScript = pkScript;
-    }
-
     public long getValue() {
         return value;
     }
@@ -48,14 +36,6 @@ public class Txout {
         this.value = value;
     }
 
-//    public int getType() {
-//        return type;
-//    }
-//
-//    public void setType(int type) {
-//        this.type = type;
-//    }
-
     public long getTx_id() {
         return tx_id;
     }
@@ -63,7 +43,6 @@ public class Txout {
     public void setTx_id(int tx_id) {
         this.tx_id = tx_id;
     }
-
 
     public long getId() {
         return id;
