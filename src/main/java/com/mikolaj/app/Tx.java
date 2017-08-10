@@ -8,15 +8,15 @@ public class Tx {
     private String transactionHash;
     private int transactionSize;
     private boolean coinbase;
-    private long lockTime;
+    private long outValue;
     private long blk_id;
 
-    public Tx(long id, String transactionHash, int transactionSize, boolean coinbase, long lockTime, long blk_id) {
+    public Tx(long id, String transactionHash, int transactionSize, boolean coinbase, long outValue, long blk_id) {
         this.id = id;
         this.transactionHash = transactionHash;
         this.transactionSize = transactionSize;
         this.coinbase = coinbase;
-        this.lockTime = lockTime;
+        this.outValue = outValue;
         this.blk_id = blk_id;
     }
 
@@ -61,11 +61,11 @@ public class Tx {
         this.id = id;
     }
 
-    public long getLockTime() {
-        return lockTime;
+    public long getOutValue() {
+        return outValue;
     }
 
-    public void setLockTime(long lockTime) {
-        this.lockTime = lockTime;
+    public void setOutValue(long outValue) {
+        this.outValue = outValue;
     }
 }

@@ -57,7 +57,7 @@ public class MyUtils {
         String transactionHash;
         int transactionSize;
         boolean coinbase;
-        long transactionLockTime;
+        long transactionOutValue;
         long blk_id; //FK
 
         // TransactionInputs
@@ -91,9 +91,9 @@ public class MyUtils {
             transactionHash = transaction.getHashAsString();
             transactionSize = transaction.getMessageSize();
             coinbase = transaction.isCoinBase();
-            transactionLockTime = transaction.getLockTime();
+            transactionOutValue = transaction.getOutputSum().value;
             blk_id = idBlk;
-            Tx tx = new Tx(idTx, transactionHash, transactionSize, coinbase, transactionLockTime, blk_id);
+            Tx tx = new Tx(idTx, transactionHash, transactionSize, coinbase, transactionOutValue, blk_id);
             txs.add(tx);
 
             //Txin
@@ -205,11 +205,11 @@ public class MyUtils {
             // Insert records
             for (Tx tx : txs) {
                 stmt = conn.createStatement();
-                String sql = "INSERT INTO tx (id, hash, coinbase, lock_time, tx_size, blk_id) VALUES ("
+                String sql = "INSERT INTO tx (id, hash, coinbase, out_value, tx_size, blk_id) VALUES ("
                         + tx.getId() + ", "
                         + "'" + tx.getTransactionHash() + "', "
                         + tx.isCoinbase() + ","
-                        + tx.getLockTime() + ","
+                        + tx.getOutValue() + ","
                         + tx.getTransactionSize() + ", "
                         + tx.getBlk_id() + ");";
                 stmt.executeUpdate(sql);
@@ -327,7 +327,7 @@ public class MyUtils {
             String txRecord = String.valueOf(tx.getId()) + ";"
                     + tx.getTransactionHash() + ";"
                     + String.valueOf(tx.isCoinbase()) + ";"
-                    + String.valueOf(tx.getLockTime()) + ";"
+                    + String.valueOf(tx.getOutValue()) + ";"
                     + String.valueOf(tx.getTransactionSize()) + ";"
                     + String.valueOf(tx.getBlk_id()) + "\n";
             txRecords = txRecords + txRecord;
@@ -411,7 +411,7 @@ public class MyUtils {
             String txRecord = String.valueOf(tx.getId()) + ";"
                     + tx.getTransactionHash() + ";"
                     + String.valueOf(tx.isCoinbase()) + ";"
-                    + String.valueOf(tx.getLockTime()) + ";"
+                    + String.valueOf(tx.getOutValue()) + ";"
                     + String.valueOf(tx.getTransactionSize()) + ";"
                     + String.valueOf(tx.getBlk_id()) + "\n";
             txRecords = txRecords + txRecord;
