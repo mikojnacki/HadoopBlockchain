@@ -48,7 +48,7 @@ public class App {
         System.out.println("\nTotal execution time: " + String.valueOf(totalTime) + "\n");
 
         // Save report on disk
-        int filesCount = MyUtils.countInputHdfsFiles(conf, args[0]); // count number of hdfs input files
+        int filesCount = MyUtils.countInputHdfsFiles(conf, args[args.length - 2]); // count number of hdfs input files
         MyUtils.generateReport(programName, execDate, filesCount, totalTime);
 
         //System.exit(exitCode);
