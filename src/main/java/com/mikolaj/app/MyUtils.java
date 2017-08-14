@@ -347,7 +347,7 @@ public class MyUtils {
                     + txin.getPrevTransactionHash() + ","
                     + String.valueOf(txin.getPrevTransactionIndex()) + ","
                     + String.valueOf(txin.getTx_id()) + "\n";
-            txinRecords = txRecords + txinRecord;
+            txinRecords = txinRecords + txinRecord;
         }
         txinOutputStream = fs.append(txinHdfsPath);
         txinOutputStream.writeChars(txinRecords);
@@ -431,7 +431,7 @@ public class MyUtils {
                     + txin.getPrevTransactionHash() + ";"
                     + String.valueOf(txin.getPrevTransactionIndex()) + ";"
                     + String.valueOf(txin.getTx_id()) + "\n";
-            txinRecords = txRecords + txinRecord;
+            txinRecords = txinRecords + txinRecord;
         }
         txinOutputStream = fs.append(txinHdfsPath);
         txinOutputStream.writeChars(txinRecords);
