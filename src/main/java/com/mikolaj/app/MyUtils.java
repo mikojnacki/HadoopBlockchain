@@ -307,10 +307,10 @@ public class MyUtils {
         String blkRecords = "";
         FSDataOutputStream blkOutputStream = null;
         for (Blk blk : parsed.getBlks()) {
-            String blkRecord = String.valueOf(blk.getId()) + ";"
-                    + blk.getBlockHash() + ";"
-                    + blk.getPrevBlockHash()
-                    + String.valueOf(blk.getTime()) + ";"
+            String blkRecord = String.valueOf(blk.getId()) + ","
+                    + blk.getBlockHash() + ","
+                    + blk.getPrevBlockHash() + ","
+                    + String.valueOf(blk.getTime()) + ","
                     + String.valueOf(blk.getBlockSize()) + "\n";
             blkRecords = blkRecords + blkRecord;
         }
@@ -324,11 +324,11 @@ public class MyUtils {
         String txRecords = "";
         FSDataOutputStream txOutputStream = null;
         for (Tx tx : parsed.getTxs()) {
-            String txRecord = String.valueOf(tx.getId()) + ";"
-                    + tx.getTransactionHash() + ";"
-                    + String.valueOf(tx.isCoinbase()) + ";"
-                    + String.valueOf(tx.getOutValue()) + ";"
-                    + String.valueOf(tx.getTransactionSize()) + ";"
+            String txRecord = String.valueOf(tx.getId()) + ","
+                    + tx.getTransactionHash() + ","
+                    + String.valueOf(tx.isCoinbase()) + ","
+                    + String.valueOf(tx.getOutValue()) + ","
+                    + String.valueOf(tx.getTransactionSize()) + ","
                     + String.valueOf(tx.getBlk_id()) + "\n";
             txRecords = txRecords + txRecord;
         }
@@ -342,10 +342,10 @@ public class MyUtils {
         String txinRecords = "";
         FSDataOutputStream txinOutputStream = null;
         for (Txin txin : parsed.getTxins()) {
-            String txinRecord = String.valueOf(txin.getId()) + ";"
-                    + String.valueOf(txin.getTxinIndex()) + ";"
-                    + txin.getPrevTransactionHash() + ";"
-                    + String.valueOf(txin.getPrevTransactionIndex()) + ";"
+            String txinRecord = String.valueOf(txin.getId()) + ","
+                    + String.valueOf(txin.getTxinIndex()) + ","
+                    + txin.getPrevTransactionHash() + ","
+                    + String.valueOf(txin.getPrevTransactionIndex()) + ","
                     + String.valueOf(txin.getTx_id()) + "\n";
             txinRecords = txRecords + txinRecord;
         }
@@ -359,11 +359,11 @@ public class MyUtils {
         String txoutRecords = "";
         FSDataOutputStream txoutOutputStream = null;
         for (Txout txout : parsed.getTxouts()) {
-            String txoutRecord = String.valueOf(txout.getId()) + ";"
-                    + String.valueOf(txout.getTxoutIndex()) + ";"
-                    + txout.getOutAddress() + ";"
-                    + String.valueOf(txout.getValue()) + ";"
-                    + txout.getTypeStr() + ";"
+            String txoutRecord = String.valueOf(txout.getId()) + ","
+                    + String.valueOf(txout.getTxoutIndex()) + ","
+                    + txout.getOutAddress() + ","
+                    + String.valueOf(txout.getValue()) + ","
+                    + txout.getTypeStr() + ","
                     + String.valueOf(txout.getTx_id()) + "\n";
             txoutRecords = txoutRecords + txoutRecord;
         }
