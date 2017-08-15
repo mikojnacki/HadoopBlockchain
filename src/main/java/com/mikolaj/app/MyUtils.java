@@ -80,7 +80,8 @@ public class MyUtils {
         //Blk
         blockHash = block.getHashAsString();
         prevBlockHash = block.getPrevBlockHash().toString();
-        time = block.getTime().getTime();
+        //time = block.getTime().getTime();
+        time = block.getTimeSeconds();
         blockSize = block.getMessageSize();
         Blk blk = new Blk(idBlk, blockHash, prevBlockHash, time, blockSize);
         blks.add(blk);
