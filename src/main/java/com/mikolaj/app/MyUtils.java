@@ -404,7 +404,8 @@ public class MyUtils {
             blkRecords = blkRecords + blkRecord;
         }
         blkOutputStream = fs.append(blkHdfsPath);
-        blkOutputStream.writeChars(blkRecords);
+        //blkOutputStream.writeChars(blkRecords);
+        blkOutputStream.writeBytes(blkRecords);
         if (blkOutputStream != null) {
             blkOutputStream.close();
         }
@@ -422,7 +423,8 @@ public class MyUtils {
             txRecords = txRecords + txRecord;
         }
         txOutputStream = fs.append(txHdfsPath);
-        txOutputStream.writeChars(txRecords);
+        //txOutputStream.writeChars(txRecords);
+        txOutputStream.writeBytes(txRecords);
         if (txOutputStream != null) {
             txOutputStream.close();
         }
@@ -439,7 +441,8 @@ public class MyUtils {
             txinRecords = txinRecords + txinRecord;
         }
         txinOutputStream = fs.append(txinHdfsPath);
-        txinOutputStream.writeChars(txinRecords);
+        //txinOutputStream.writeChars(txinRecords);
+        txinOutputStream.writeBytes(txinRecords);
         if (txinOutputStream != null) {
             txinOutputStream.close();
         }
@@ -457,7 +460,8 @@ public class MyUtils {
             txoutRecords = txoutRecords + txoutRecord;
         }
         txoutOutputStream = fs.append(txoutHdfsPath);
-        txoutOutputStream.writeChars(txoutRecords);
+        //txoutOutputStream.writeChars(txoutRecords);
+        txoutOutputStream.writeBytes(txoutRecords);
         if (txoutOutputStream != null) {
             txoutOutputStream.close();
         }

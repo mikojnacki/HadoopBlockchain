@@ -1,40 +1,37 @@
 package com.mikolaj.app;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import org.apache.log4j.Logger;
 import org.bitcoinj.core.Block;
-import org.bitcoinj.core.Context;
-import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.MainNetParams;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
 import java.util.Arrays;
 
 /**
- * Created by Mikolaj on 03.08.17.
- *
- * TODO: throws exception
- *
+ * Parses block, transactions, transaction inputs and transaction outputs to HDFS files - 1 file per task, per type
  */
-public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable, NullWritable, NullWritable> {
+public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable, NullWritable, Text> {
 
-    private static Logger logger = Logger.getLogger(ParseHdfsRawMapper.class.getName());
+    private static Logger logger = Logger.getLogger(ParseHdfsRawTaskMapper.class.getName());
     private final org.bitcoinj.core.Context bitcoinContext = new org.bitcoinj.core.Context(MainNetParams.get());
-    private Connection conn = null;
-    private Statement stmt = null;
 
     // uid solution, idea from: http://shzhangji.com/blog/2013/10/31/generate-auto-increment-id-in-map-reduce-job/
     private long id;
     private int increment;
     private int taskId;
-    //private final int gid = 1000000;
+
+    private Text outKey = new Text();
+    private Text outValue = new Text();
+    private String delim = ";"; // separator
+
+    private MultipleOutputs<NullWritable, Text> output;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
@@ -44,24 +41,16 @@ public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable,
         if (increment == 0) {
             throw new IllegalArgumentException("mapred.map.tasks is zero");
         }
-        // Create hdfs file
-        FileSystem fs = FileSystem.newInstance(context.getConfiguration());
-        Path blkHdfsPath = new Path("/user/Mikolaj/blockchain/output/blk" + String.valueOf(taskId));
-        Path txHdfsPath = new Path("/user/Mikolaj/blockchain/output/tx" + String.valueOf(taskId));
-        Path txinHdfsPath = new Path("/user/Mikolaj/blockchain/output/intx" + String.valueOf(taskId));
-        Path txoutHdfsPath = new Path("/user/Mikolaj/blockchain/output/outtx" + String.valueOf(taskId));
-        //fShell.setrepr((short) 1, filePath);
-        fs.createNewFile(blkHdfsPath);
-        fs.createNewFile(txHdfsPath);
-        fs.createNewFile(txinHdfsPath);
-        fs.createNewFile(txoutHdfsPath);
-        fs.close();
+
+        output = new MultipleOutputs(context);
     }
 
     @Override
     public void map(BytesWritable key, BytesWritable value, Context context) throws IOException, InterruptedException {
-        // parse blockchain file and append to HDFS output files
+        // parse blockchain file and emit to reducer per type per taskId
         Configuration conf = context.getConfiguration();
+        //Text outKey = new Text();
+        //Text outValue = new Text();
 
         // uid solution
         id += increment;
@@ -75,10 +64,71 @@ public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable,
         //System.out.println("\nParsing " + file.toString() + " with GID starting from " + String.valueOf(i * gid));
         Parsed parsed = MyUtils.parse(block, id);
 
-        // dump parsed data to HDFS files, one file per Task
-        MyUtils.createHdfsFilesTask(parsed, "/user/Mikolaj/blockchain/output/", taskId, conf);
+        outKey.set("B" + String.valueOf(taskId)); // key B for blk
+        for (Blk blk : parsed.getBlks()) {
+            outValue.set(String.valueOf(blk.getId()) + delim
+                    + blk.getPrevBlockHash() + delim
+                    + blk.getBlockHash() + delim
+                    + String.valueOf(blk.getTime()) + delim
+                    + String.valueOf(blk.getBlockSize()));
+            //context.write(outKey, outValue);
+            output.write(NullWritable.get(), outValue, generateFileName(outKey));
+        }
 
-        // emit nothing
-        context.write(NullWritable.get(), NullWritable.get());
+        outKey.set("T" + String.valueOf(taskId)); // key T for tx
+        for (Tx tx : parsed.getTxs()) {
+            outValue.set(String.valueOf(tx.getId()) + delim
+                    + tx.getTransactionHash() + delim
+                    + String.valueOf(tx.isCoinbase()) + delim
+                    + String.valueOf(tx.getOutValue()) + delim
+                    + String.valueOf(tx.getTransactionSize()) + delim
+                    + String.valueOf(tx.getBlk_id()));
+            //context.write(outKey, outValue);
+            output.write(NullWritable.get(), outValue, generateFileName(outKey));
+        }
+
+        outKey.set("I" + String.valueOf(taskId)); // key I for txin
+        for (Txin txin : parsed.getTxins()) {
+            outValue.set(String.valueOf(txin.getId()) + delim
+                    + String.valueOf(txin.getTxinIndex()) + delim
+                    + txin.getPrevTransactionHash() + delim
+                    + String.valueOf(txin.getPrevTransactionIndex()) + delim
+                    + String.valueOf(txin.getTx_id()));
+            //context.write(outKey, outValue);
+            output.write(NullWritable.get(), outValue, generateFileName(outKey));
+        }
+
+        outKey.set("O" + String.valueOf(taskId)); // key O for txout
+        for (Txout txout : parsed.getTxouts()) {
+            outValue.set(String.valueOf(txout.getId()) + delim
+                    + String.valueOf(txout.getTxoutIndex()) + delim
+                    + txout.getOutAddress() + delim
+                    + String.valueOf(txout.getValue()) + delim
+                    + txout.getTypeStr() + delim
+                    + String.valueOf(txout.getTx_id()));
+            //context.write(outKey, outValue);
+            output.write(NullWritable.get(), outValue, generateFileName(outKey));
+        }
+    }
+
+    @Override
+    public void cleanup(Context context) throws IOException, InterruptedException
+    {
+        output.close();
+    }
+
+    private String generateFileName(Text k) {
+        if (k.charAt(0) == 'B') {
+            return "blk" + k.toString().substring(1);
+        } else if (k.charAt(0) == 'T') {
+            return "tx" + k.toString().substring(1);
+        } else if (k.charAt(0) == 'I') {
+            return "txin" + k.toString().substring(1);
+        } else if (k.charAt(0) == 'O') {
+            return "txout" + k.toString().substring(1);
+        } else {
+            return "error";
+        }
     }
 }
+

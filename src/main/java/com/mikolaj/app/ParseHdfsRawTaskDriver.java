@@ -4,16 +4,17 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.LazyOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
-import org.zuinnote.hadoop.bitcoin.format.mapreduce.BitcoinRawBlockFileInputFormat;
 
 /**
- * Created by Mikolaj on 03.08.17.
- * TODO: throws exception
+ * Parses block, transactions, transaction inputs and transaction outputs to HDFS files - 1 file per task, per type
  */
 public class ParseHdfsRawTaskDriver extends Configured implements Tool {
 
@@ -29,17 +30,15 @@ public class ParseHdfsRawTaskDriver extends Configured implements Tool {
         Job job = Job.getInstance(getConf(), "ParseHdfsRawTask program");
         job.setJarByClass(getClass());
         job.setMapOutputKeyClass(NullWritable.class);
-        job.setMapOutputValueClass(NullWritable.class);
+        job.setMapOutputValueClass(Text.class);
         job.setOutputKeyClass(NullWritable.class);
-        job.setOutputValueClass(NullWritable.class);
+        job.setOutputValueClass(Text.class);
 
         job.setMapperClass(ParseHdfsRawTaskMapper.class);
-        //job.setReducerClass(AddressOutputReducer.class); // the same Reducer for raw input
-        //job.setCombinerClass(AddressOutputReducer); // if combiner is needed
-        job.setNumReduceTasks(0); // for 0 reducer
+        job.setNumReduceTasks(0);
 
         job.setInputFormatClass(org.zuinnote.hadoop.bitcoin.format.mapreduce.BitcoinRawBlockFileInputFormat.class);
-        //job.setOutputFormatClass(TextOutputFormat.class);
+        LazyOutputFormat.setOutputFormatClass(job, TextOutputFormat.class);
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
         FileSystem.get(getConf()).delete(new Path(args[1]),true); // not sure
