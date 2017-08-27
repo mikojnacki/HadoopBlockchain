@@ -1,6 +1,7 @@
 package com.mikolaj.app;
 
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -26,7 +27,6 @@ public class ParsePostgresRawDriver extends Configured implements Tool {
 
         Job job = Job.getInstance(getConf(), "ParsePostgresRaw program");
         job.setJarByClass(getClass());
-        //job.setJarByClass(org.zuinnote.hadoop.bitcoin.format.mapreduce.BitcoinRawBlockFileInputFormat.class); // not sure
         job.setMapOutputKeyClass(NullWritable.class);
         job.setMapOutputValueClass(NullWritable.class);
         job.setOutputKeyClass(NullWritable.class);
@@ -41,6 +41,7 @@ public class ParsePostgresRawDriver extends Configured implements Tool {
         //job.setOutputFormatClass(TextOutputFormat.class);
 
         FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileSystem.get(getConf()).delete(new Path(args[1]),true); // not sure
         //FileOutputFormat.setOutputPath(job, new Path(args[1] + "/" + MyUtils.getCurrentDateTime()));
         FileOutputFormat.setOutputPath(job, new Path(args[1])); // for real HDFS
 

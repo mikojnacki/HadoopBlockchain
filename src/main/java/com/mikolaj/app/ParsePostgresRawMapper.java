@@ -35,12 +35,13 @@ public class ParsePostgresRawMapper extends Mapper<BytesWritable, BytesWritable,
     // uid solution, idea from: http://shzhangji.com/blog/2013/10/31/generate-auto-increment-id-in-map-reduce-job/
     private long id;
     private int increment;
-    //private final int gid = 1000000;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         id = context.getTaskAttemptID().getTaskID().getId();
-        increment = context.getConfiguration().getInt("mapred.map.tasks", 0);
+        //increment = context.getConfiguration().getInt("mapred.map.tasks", 0);
+        increment = context.getConfiguration().getInt("mapreduce.job.maps", 0);
         if (increment == 0) {
             throw new IllegalArgumentException("mapred.map.tasks is zero");
         }
@@ -64,21 +65,11 @@ public class ParsePostgresRawMapper extends Mapper<BytesWritable, BytesWritable,
         Parsed parsed = MyUtils.parse(block, id);
 
         // insert into PostgreSQL db
-        MyUtils.insertBlocks(parsed.getBlks(), conn, stmt);
-        MyUtils.insertTransactions(parsed.getTxs(), conn, stmt);
-        MyUtils.insertTransactionInputs(parsed.getTxins(), conn, stmt);
-        MyUtils.insertTransactionOutputs(parsed.getTxouts(), conn, stmt);
-
-//        List<Blk> blks = parsed.getBlks();
-//        List<Tx> txs = parsed.getTxs();
-//        List<Txin> txins = parsed.getTxins();
-//        List<Txout> txouts = parsed.getTxouts();
-//
-//        // insert into PostgreSQL db
-//        MyUtils.insertBlocks(blks, conn, stmt);
-//        MyUtils.insertTransactions(txs, conn, stmt);
-//        MyUtils.insertTransactionInputs(txins, conn, stmt);
-//        MyUtils.insertTransactionOutputs(txouts, conn, stmt);
+        MyUtils.insertAll(parsed, conn, stmt);
+        //MyUtils.insertBlocks(parsed.getBlks(), conn, stmt);
+        //MyUtils.insertTransactions(parsed.getTxs(), conn, stmt);
+        //MyUtils.insertTransactionInputs(parsed.getTxins(), conn, stmt);
+        //MyUtils.insertTransactionOutputs(parsed.getTxouts(), conn, stmt);
 
         // emit nothing
         context.write(NullWritable.get(), NullWritable.get());

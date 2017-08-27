@@ -28,7 +28,7 @@ public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable,
 
     private Text outKey = new Text();
     private Text outValue = new Text();
-    private String delim = ";"; // separator
+    private String delim = ","; // separator
 
     private MultipleOutputs<NullWritable, Text> output;
 
@@ -37,7 +37,8 @@ public class ParseHdfsRawTaskMapper extends Mapper<BytesWritable, BytesWritable,
         super.setup(context);
         taskId = context.getTaskAttemptID().getTaskID().getId();
         id = context.getTaskAttemptID().getTaskID().getId();
-        increment = context.getConfiguration().getInt("mapred.map.tasks", 0);
+        //increment = context.getConfiguration().getInt("mapred.map.tasks", 0);
+        increment = context.getConfiguration().getInt("mapreduce.job.maps", 0);
         if (increment == 0) {
             throw new IllegalArgumentException("mapred.map.tasks is zero");
         }

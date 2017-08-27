@@ -291,6 +291,74 @@ public class MyUtils {
         //System.out.println("TXOUT: Records created successfully");
     }
 
+    public static void insertAll(Parsed parsed, Connection conn, Statement stmt) {
+        try {
+            Class.forName("org.postgresql.Driver");
+            conn = DriverManager
+                    .getConnection("jdbc:postgresql://localhost:5432/blockchain",
+                            "postgres", "jalokim123");
+            conn.setAutoCommit(false);
+            //System.out.println("BLK: Database opened successfully");
+
+            // Insert blk
+            for (Blk blk : parsed.getBlks()) {
+                stmt = conn.createStatement();
+                String sql = "INSERT INTO blk (id, hash, prev_hash, time, blk_size) VALUES ("
+                        + blk.getId() + ", "
+                        + "'" + blk.getBlockHash() + "', "
+                        + "'" + blk.getPrevBlockHash() + "', "
+                        + blk.getTime() + ","
+                        + blk.getBlockSize() + ");";
+                stmt.executeUpdate(sql);
+            }
+
+            // Insert tx
+            for (Tx tx : parsed.getTxs()) {
+                stmt = conn.createStatement();
+                String sql = "INSERT INTO tx (id, hash, coinbase, out_value, tx_size, blk_id) VALUES ("
+                        + tx.getId() + ", "
+                        + "'" + tx.getTransactionHash() + "', "
+                        + tx.isCoinbase() + ","
+                        + tx.getOutValue() + ","
+                        + tx.getTransactionSize() + ", "
+                        + tx.getBlk_id() + ");";
+                stmt.executeUpdate(sql);
+            }
+
+            // Insert txin
+            for (Txin txin : parsed.getTxins()) {
+                stmt = conn.createStatement();
+                String sql = "INSERT INTO txin (id, tx_idx, prev_out, prev_out_index, tx_id) VALUES ("
+                        + txin.getId() + ", "
+                        + txin.getTxinIndex() + ","
+                        + "'" + txin.getPrevTransactionHash() + "', "
+                        + txin.getPrevTransactionIndex() + ","
+                        + txin.getTx_id() + ");";
+                stmt.executeUpdate(sql);
+            }
+
+            // Insert txout
+            for (Txout txout : parsed.getTxouts()) {
+                stmt = conn.createStatement();
+                String sql = "INSERT INTO txout (id, tx_idx, address, value, type, tx_id) VALUES ("
+                        + txout.getId() + ", "
+                        + txout.getTxoutIndex() + ","
+                        + "'" + txout.getOutAddress() + "', "
+                        + txout.getValue() + ","
+                        + "'" + txout.getTypeStr() + "', "
+                        + txout.getTx_id() + ");";
+                stmt.executeUpdate(sql);
+            }
+
+            stmt.close();
+            conn.commit();
+            conn.close();
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            System.exit(0);
+        }
+    }
+
     public static void createHdfsFiles(Parsed parsed, String path, long id, Configuration conf) throws IOException {
 
         FileSystem fs = FileSystem.newInstance(conf);
