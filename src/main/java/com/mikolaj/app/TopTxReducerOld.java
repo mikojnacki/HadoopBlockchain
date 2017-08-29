@@ -10,7 +10,7 @@ import java.util.TreeMap;
 /**
  * Created by Mikolaj on 13.07.17.
  */
-public class TopTxReducer extends Reducer<NullWritable, MapWritable, Text, LongWritable> {
+public class TopTxReducerOld extends Reducer<NullWritable, MapWritable, Text, LongWritable> {
 
     // Stores a map of outAddresses to value of Satoshis
     private TreeMap<Writable, Writable> outAddressSatoshiMap = new TreeMap<Writable, Writable>();

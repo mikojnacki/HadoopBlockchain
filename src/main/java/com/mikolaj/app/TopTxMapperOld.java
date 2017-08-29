@@ -14,7 +14,7 @@ import java.util.TreeMap;
 /**
  * Created by Mikolaj on 13.07.17.
  */
-public class TopTxMapper extends Mapper<Object, Text, NullWritable, MapWritable> {
+public class TopTxMapperOld extends Mapper<Object, Text, NullWritable, MapWritable> {
 
     // Stores a map of outAddresses to value of Satoshis
     private TreeMap<LongWritable, Text> outAddressSatoshiMap = new TreeMap<LongWritable, Text>();

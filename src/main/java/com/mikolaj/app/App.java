@@ -1,14 +1,8 @@
 package com.mikolaj.app;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.ToolRunner;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
  * smaller
@@ -32,7 +26,7 @@ public class App {
         //ToolRunner.run(new AddressOutputDriver(), args);
         //ToolRunner.run(new AddressOutputRawDriver(), args);
         //ToolRunner.run(new TransactionGraphDriver(), args);
-        //ToolRunner.run(new TopTxDriver(), args);
+        //ToolRunner.run(new TopTxDriverOld(), args);
 
         // Parse blockchain into PostgreSQL database
         ToolRunner.run(new ParsePostgresRawDriver(), args);

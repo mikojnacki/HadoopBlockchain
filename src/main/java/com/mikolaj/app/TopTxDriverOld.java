@@ -19,7 +19,7 @@ import org.zuinnote.hadoop.bitcoin.format.mapreduce.BitcoinRawBlockFileInputForm
 /**
  * Created by Mikolaj on 13.07.17.
  */
-public class TopTxDriver extends Configured implements Tool {
+public class TopTxDriverOld extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
@@ -37,8 +37,8 @@ public class TopTxDriver extends Configured implements Tool {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(LongWritable.class);
 
-        job.setMapperClass(TopTxMapper.class);
-        job.setReducerClass(TopTxReducer.class); // the same Reducer for raw input
+        job.setMapperClass(TopTxMapperOld.class);
+        job.setReducerClass(TopTxReducerOld.class); // the same Reducer for raw input
         //job.setCombinerClass(AddressOutputReducer); // if combiner is needed
         job.setNumReduceTasks(1); // for 0 reducer
 
