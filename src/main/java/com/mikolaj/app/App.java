@@ -21,20 +21,13 @@ public class App {
         conf.set("hadoopcryptoledger.bitcoinblockinputformat.filter.magic","F9BEB4D9");
         //conf.setBoolean("fs.hdfs.impl.disable.cache", true); //not sure, for appending in HDFS
 
-        //ToolRunner.run(new TotalTxCountDriver(), args);
-        //ToolRunner.run(new BlockTxSumDriver(), args);
-        //ToolRunner.run(new AddressOutputDriver(), args);
-        //ToolRunner.run(new AddressOutputRawDriver(), args);
-        //ToolRunner.run(new TransactionGraphDriver(), args);
-        //ToolRunner.run(new TopTxDriverOld(), args);
-
         // Parse blockchain into PostgreSQL database
         //ToolRunner.run(new ParsePostgresRawDriver(), args);
         //programName = "ParsePostgresRawMapReduce";
 
         // Parse blockchain into HDFS text files (per taks)
-        //ToolRunner.run(new ParseHdfsRawTaskDriver(), args);
-        //programName = "ParseHdfsRawTaskMapReduce";
+        ToolRunner.run(new ParseHdfsRawTaskDriver(), args);
+        programName = "ParseHdfsRawTaskMapReduce";
 
         // Finish calculating execution time
         long endTime = System.currentTimeMillis();
@@ -42,8 +35,8 @@ public class App {
         System.out.println("\nTotal execution time: " + String.valueOf(totalTime) + "\n");
 
         // Save report on disk
-        //int filesCount = MyUtils.countInputHdfsFiles(conf, args[args.length - 2]); // count number of hdfs input files
-        //MyUtils.generateReport(programName, execDate, filesCount, totalTime);
+        int filesCount = MyUtils.countInputHdfsFiles(conf, args[args.length - 2]); // count number of hdfs input files
+        MyUtils.generateReport(programName, execDate, filesCount, totalTime);
 
         //System.exit(exitCode);
     }

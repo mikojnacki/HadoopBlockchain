@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by Mikolaj on 30.06.17.
+ * Utilities
  */
 public class MyUtils {
 
@@ -586,7 +586,7 @@ public class MyUtils {
             writer.println(programName);
             writer.println("Execution date: " + execDate);
             writer.println("Number of input files: " + String.valueOf(filesCount)); // input args
-            writer.println("Execution time in ms: " + String.valueOf(totalTime / 1000.0));
+            writer.println("Execution time: " + String.valueOf(totalTime / 1000.0) + " seconds");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
