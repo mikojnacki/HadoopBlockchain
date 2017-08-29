@@ -188,6 +188,9 @@ public class TopTx extends Configured implements Tool {
         job.waitForCompletion(true);
         System.out.println("\nJob Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
 
+        // Save execution time on disk
+        MyUtils.generateReport(TopTx.class.getSimpleName(), MyUtils.getCurrentDateTime(),System.currentTimeMillis() - startTime);
+
         return 0;
     }
 
