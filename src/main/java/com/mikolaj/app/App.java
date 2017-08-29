@@ -29,8 +29,8 @@ public class App {
         //ToolRunner.run(new TopTxDriverOld(), args);
 
         // Parse blockchain into PostgreSQL database
-        ToolRunner.run(new ParsePostgresRawDriver(), args);
-        programName = "ParsePostgresRawMapReduce";
+        //ToolRunner.run(new ParsePostgresRawDriver(), args);
+        //programName = "ParsePostgresRawMapReduce";
 
         // Parse blockchain into HDFS text files (per taks)
         //ToolRunner.run(new ParseHdfsRawTaskDriver(), args);
@@ -42,8 +42,8 @@ public class App {
         System.out.println("\nTotal execution time: " + String.valueOf(totalTime) + "\n");
 
         // Save report on disk
-        int filesCount = MyUtils.countInputHdfsFiles(conf, args[args.length - 2]); // count number of hdfs input files
-        MyUtils.generateReport(programName, execDate, filesCount, totalTime);
+        //int filesCount = MyUtils.countInputHdfsFiles(conf, args[args.length - 2]); // count number of hdfs input files
+        //MyUtils.generateReport(programName, execDate, filesCount, totalTime);
 
         //System.exit(exitCode);
     }

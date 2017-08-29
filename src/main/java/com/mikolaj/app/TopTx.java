@@ -31,9 +31,9 @@ public class TopTx extends Configured implements Tool {
     public static class TopTxMapper extends Mapper<Object, Text, NullWritable, PairOfLongString> {
 
         // Stores a map of outAddresses to value of Satoshis
-        private TreeMap<LongWritable, Text> outAddressSatoshiMap = new TreeMap<LongWritable, Text>();
+        private static TreeMap<LongWritable, Text> outAddressSatoshiMap = new TreeMap<LongWritable, Text>();
 
-        private PairOfLongString mapOutput = new PairOfLongString();
+        private static PairOfLongString mapOutput = new PairOfLongString();
         int k;
 
         @Override
@@ -51,8 +51,8 @@ public class TopTx extends Configured implements Tool {
             if (outAddressSatoshiMap.size() > k) {
                 outAddressSatoshiMap.remove(outAddressSatoshiMap.firstKey());
             }
-            LOG.info("size: " + outAddressSatoshiMap.size());
-            LOG.info("n: " + k);
+            //LOG.info("size: " + outAddressSatoshiMap.size());
+            //LOG.info("n: " + k);
         }
 
         @Override
@@ -69,9 +69,9 @@ public class TopTx extends Configured implements Tool {
     public static class TopTxReducer extends Reducer<NullWritable, PairOfLongString, Text, LongWritable> {
 
         // Stores a map of outAddresses to value of Satoshis
-        private TreeMap<LongWritable, Text> outAddressSatoshiMap = new TreeMap<LongWritable, Text>();
-        Text outAddress = new Text();
-        LongWritable satoshi = new LongWritable(0);
+        private static TreeMap<LongWritable, Text> outAddressSatoshiMap = new TreeMap<LongWritable, Text>();
+        static Text outAddress = new Text();
+        static LongWritable satoshi = new LongWritable(0);
         int k;
 
         @Override
